@@ -121,7 +121,25 @@ void dataconfigs::loadLevelBGO(QProgressDialog *prgs)
             sbgo.group = bgoset.value("group", "_NoGroup").toString();
             sbgo.category = bgoset.value("category", "_Other").toString();
             sbgo.grid = bgoset.value("grid", default_grid).toInt();
-            sbgo.view = (int)(bgoset.value("view", "background").toString()=="foreground");
+
+            {
+                QString tmpStr=bgoset.value("view", "background").toString();
+
+                if(tmpStr=="foreground2")
+                    sbgo.view = 2;
+                else
+                if(tmpStr=="foreground")
+                    sbgo.view = 1;
+                else
+                if(tmpStr=="background")
+                    sbgo.view = 0;
+                else
+                if(tmpStr=="background2")
+                    sbgo.view = -1;
+                else
+                    sbgo.view = 0;
+            }
+
             sbgo.offsetX = bgoset.value("offset-x", "0").toInt();
             sbgo.offsetY = bgoset.value("offset-y", "0").toInt();
             sbgo.zOffset = bgoset.value("z-offset", "0").toInt();
@@ -151,11 +169,6 @@ void dataconfigs::loadLevelBGO(QProgressDialog *prgs)
                 addError(QString("BGO-%1 Image filename isn't defined").arg(i));
                 goto skipBGO;
             }
-                /*
-                {
-                    sbgo.image = QPixmap(QApplication::applicationDirPath() + "/" + "data/unknown_bgo.gif");
-                    sbgo.mask_n = "";
-                }*/
             sbgo.climbing = (bgoset.value("climbing", "0").toString()=="1");
             sbgo.animated = (bgoset.value("animated", "0").toString()=="1");
             sbgo.frames = bgoset.value("frames", "1").toInt();

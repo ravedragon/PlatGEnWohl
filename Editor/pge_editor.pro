@@ -22,7 +22,8 @@
 #
 #----------------------------------------------------------------------------
 
-QT       += gui widgets multimedia
+QT       += gui widgets network
+QT       -= opengl
 
 DESTDIR = ../bin
 
@@ -38,6 +39,25 @@ CONFIG += c++11
 
 CONFIG += static
 CONFIG += thread
+
+LIBS += -lSDL2 -lSDL2_mixer
+win32: LIBS += -lSDL2main
+win32: LIBS += libversion
+
+#DEFINES += USE_QMEDIAPLAYER
+
+win32: static: {
+    DEFINES += MIKMOD_STATIC
+    LIBS +=  -lvorbisfile -lvorbis -lmad -lmikmod.dll -lflac -logg
+}
+
+USE_QMEDIAPLAYER: {
+QT += multimedia
+}
+else
+{
+QT -= multimedia
+}
 
 TRANSLATIONS += languages/editor_en.ts \
     languages/editor_ru.ts \
@@ -193,7 +213,11 @@ SOURCES += main.cpp\
     file_formats/wld_filedata.cpp \
     file_formats/pge_x.cpp \
     SingleApplication/localserver.cpp \
-    SingleApplication/singleapplication.cpp
+    SingleApplication/singleapplication.cpp \
+    level_scene/item_playerpoint.cpp \
+    common_features/sdl_music_player.cpp \
+    data_configs/custom_data.cpp \
+    file_formats/file_wldx.cpp
 
 HEADERS  += mainwindow.h \
     file_formats/file_formats.h \
@@ -278,7 +302,10 @@ HEADERS  += mainwindow.h \
     common_features/npc_animator.h \
     data_configs/config_manager.h \
     SingleApplication/localserver.h \
-    SingleApplication/singleapplication.h
+    SingleApplication/singleapplication.h \
+    level_scene/item_playerpoint.h \
+    common_features/sdl_music_player.h \
+    common_features/app_path.h
 
 FORMS    += \
     mainwindow.ui \

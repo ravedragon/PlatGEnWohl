@@ -33,6 +33,7 @@
 #include <QApplication>
 #include <QtCore>
 #include <QDebug>
+#include <QList>
 
 #include "../common_features/simple_animator.h"
 #include "../common_features/npc_animator.h"
@@ -150,6 +151,9 @@ public:
     void setLayerToSelected();
     void setLayerToSelected(QString lName, bool isNew=false);
 
+    //Debugger box
+    void Debugger_updateItemList();
+
     //Array Sort functions
     void sortBlockArray(QVector<LevelBlock > &blocks);
     void sortBlockArrayByPos(QVector<LevelBlock > &blocks);
@@ -164,7 +168,8 @@ public:
     QVector<SimpleAnimator * > animates_Blocks;
     QVector<AdvNpcAnimator * > animates_NPC;
 
-    QGraphicsItem * itemCollidesWith(QGraphicsItem * item);
+    bool checkGroupCollisions(QList<QGraphicsItem *> *items);
+    QGraphicsItem * itemCollidesWith(QGraphicsItem * item, QList<QGraphicsItem *> *itemgrp = 0);
 
     LevelData  * LvlData;
 
@@ -187,20 +192,25 @@ public:
     bool haveSelected;
 
     //default objects Z value
-    int blockZ; // standart block
-    int blockZs; // sizeble block
-    int blockZl; // lava block
-    int playerZ; //playerPointZ
-    int bgoZf; // foreground BGO
-    int bgoZb; // backround BGO
-    int npcZf; // foreground NPC
-    int npcZs; // standart NPC
-    int npcZb; // background NPC (vines)
-    int doorZ;
-    int waterZ;
-    int bgZ;
-    int spaceZ1; // interSection space layer
-    int spaceZ2;
+    int Z_backImage;
+
+    int Z_BGOBack2; // backround BGO
+    int Z_blockSizable; // sizeble block
+    int Z_BGOBack1; // backround BGO
+    int Z_Block; // standart block
+    int Z_npcBack; // background NPC (vines)
+    int Z_npcStd; // standart NPC
+    int Z_Player; //playerPointZ
+    int Z_BGOFore1; // foreground BGO
+    int Z_BlockFore; // lava block
+    int Z_npcFore; // foreground NPC
+    int Z_BGOFore2; // foreground BGO
+
+
+    int Z_sys_door;
+    int Z_sys_PhysEnv;
+    int Z_sys_interspace1; // interSection space layer
+    int Z_sys_sctBorder;
 
     // //////////////////////Resizer////////////////////////
     ItemResizer * pResizer; //reisizer pointer
@@ -564,6 +574,13 @@ private:
     void removeItemUnderCursor();
 
     QPoint applyGrid(QPoint source, int gridSize, QPoint gridOffset=QPoint(0,0) );
+    void applyGroupGrid(QList<QGraphicsItem *> items, bool force=false);
+
+    void applyArrayForItemGroup(QList<QGraphicsItem * >items);
+    void applyArrayForItem(QGraphicsItem * item);
+
+    void returnItemBackGroup(QList<QGraphicsItem * >items);
+    void returnItemBack(QGraphicsItem * item);
 
     void setSectionBG(LevelSection section, bool forceTiled=false);
 

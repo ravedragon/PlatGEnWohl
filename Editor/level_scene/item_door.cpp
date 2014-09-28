@@ -374,6 +374,19 @@ void ItemDoor::setLayer(QString layer)
 void ItemDoor::arrayApply()
 {
     bool found=false;
+
+    if(direction==D_Entrance)
+    {
+        doorData.ix = qRound(this->scenePos().x());
+        doorData.iy = qRound(this->scenePos().y());
+    }
+    else
+    {
+        doorData.ox = qRound(this->scenePos().x());
+        doorData.oy = qRound(this->scenePos().y());
+    }
+
+
     if(doorData.index < (unsigned int)scene->LvlData->doors.size())
     { //Check index
         if(doorData.array_id == scene->LvlData->doors[doorData.index].array_id)
@@ -520,12 +533,12 @@ void ItemDoor::setDoorData(LevelDoors inD, int doorDir, bool init)
     this->setFlag(QGraphicsItem::ItemIsMovable, (!scene->lock_door));
 
     //doorLabel_shadow->setZValue(scene->doorZ+0.0000001);
-    doorLabel->setZValue(scene->doorZ+0.0000002);
+    doorLabel->setZValue(scene->Z_sys_door+0.0000002);
 
     this->setData(1, QString::number(0) );
     this->setData(2, QString::number(doorData.array_id) );
 
-    this->setZValue(scene->doorZ);
+    this->setZValue(scene->Z_sys_door);
 
     if(!init)
     {

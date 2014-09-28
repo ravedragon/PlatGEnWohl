@@ -144,11 +144,16 @@ public:
 
     void startAnimation();
     void stopAnimation();
+    void setSemiTransparentPaths(bool semiTransparent);
+
     //void hideWarpsAndDoors(bool visible);
     void hideMusicBoxes(bool visible);
     void hidePathAndLevels(bool visible);
 
     void setLocked(int type, bool lock);
+
+    //Debugger box
+    void Debugger_updateItemList();
 
     QVector<UserIMGs > uTiles;
     QVector<UserIMGs > uScenes;
@@ -160,7 +165,8 @@ public:
     QVector<SimpleAnimator * > animates_Paths;
     QVector<SimpleAnimator * > animates_Levels;
 
-    QGraphicsItem * itemCollidesWith(QGraphicsItem * item);
+    bool checkGroupCollisions(QList<QGraphicsItem *> *items);
+    QGraphicsItem * itemCollidesWith(QGraphicsItem * item, QList<QGraphicsItem *> *itemgrp = 0);
 
     WorldData  * WldData;
 
@@ -363,6 +369,13 @@ private:
     void removeItemUnderCursor();
 
     QPoint applyGrid(QPoint source, int gridSize, QPoint gridOffset=QPoint(0,0) );
+    void applyGroupGrid(QList<QGraphicsItem *> items, bool force=false);
+
+    void applyArrayForItemGroup(QList<QGraphicsItem * >items);
+    void applyArrayForItem(QGraphicsItem * item);
+
+    void returnItemBackGroup(QList<QGraphicsItem * >items);
+    void returnItemBack(QGraphicsItem * item);
 
     //void setSectionBG(LevelSection section);
 

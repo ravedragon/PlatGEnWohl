@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../mainwindow.h"
-#include "../edit_level/level_edit.h"
 #include "file_formats.h"
 
 
@@ -244,7 +242,7 @@ LevelLayers FileFormats::dummyLvlLayer()
 PlayerPoint FileFormats::dummyLvlPlayerPoint(int id)
 {
     PlayerPoint dummyPlayer;
-    dummyPlayer.id=0;
+    dummyPlayer.id=id;
     dummyPlayer.x=0;
     dummyPlayer.y=0;
     dummyPlayer.w=24;
@@ -271,6 +269,7 @@ LevelData FileFormats::dummyLvlDataArray()
     NewFileData.ReadFileValid = true;
     NewFileData.modified = true;
     NewFileData.untitled = true;
+    NewFileData.smbx64strict = false;
 
     NewFileData.CurSection=0;
     NewFileData.playmusic=0;
@@ -296,12 +295,12 @@ LevelData FileFormats::dummyLvlDataArray()
     }
 
     //Create players array
-    PlayerPoint players = dummyLvlPlayerPoint();
-        for(int i=0; i<2;i++)
-        {
-            players.id++;
-            NewFileData.players.push_back(players);
-        }
+    //PlayerPoint players = dummyLvlPlayerPoint();
+    //    for(int i=0; i<2;i++)
+    //    {
+    //        players.id++;
+    //        NewFileData.players.push_back(players);
+    //    }
 
 
     //Create system layers

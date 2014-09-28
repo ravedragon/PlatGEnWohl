@@ -85,6 +85,7 @@ LevelData LvlScene::copy(bool cut)
         {
             LvlData->modified = true;
             addRemoveHistory(copyData);
+            Debugger_updateItemList();
         }
     }
 
@@ -154,7 +155,7 @@ void LvlScene::paste(LevelData BufferIn, QPoint pos)
         LvlData->blocks_array_id++;
         dumpBlock.array_id = LvlData->blocks_array_id;
 
-        placeBlock(dumpBlock, true);
+        placeBlock(dumpBlock);
 
         LvlData->blocks.push_back(dumpBlock);
         newData.blocks.push_back(dumpBlock);
@@ -167,7 +168,7 @@ void LvlScene::paste(LevelData BufferIn, QPoint pos)
         LvlData->bgo_array_id++;
         dumpBGO.array_id = LvlData->bgo_array_id;
 
-        placeBGO(dumpBGO, true);
+        placeBGO(dumpBGO);
 
         LvlData->bgo.push_back(dumpBGO);
 
@@ -181,7 +182,7 @@ void LvlScene::paste(LevelData BufferIn, QPoint pos)
         dumpNPC.y = (long)pos.y() + npc.y - baseY;
         LvlData->npc_array_id++;
         dumpNPC.array_id = LvlData->npc_array_id;
-        placeNPC(dumpNPC, true);
+        placeNPC(dumpNPC);
         LvlData->npc.push_back(dumpNPC);
         newData.npc.push_back(dumpNPC);
     }
@@ -192,10 +193,12 @@ void LvlScene::paste(LevelData BufferIn, QPoint pos)
         dumpWater.y = (long)pos.y() + water.y - baseY;
         LvlData->npc_array_id++;
         dumpWater.array_id = LvlData->npc_array_id;
-        placeWater(dumpWater, true);
+        placeWater(dumpWater);
         LvlData->physez.push_back(dumpWater);
         newData.physez.push_back(dumpWater);
     }
+
+    applyGroupGrid(selectedItems(), true);
 
     LvlData->modified = true;
     addPlaceHistory(newData);

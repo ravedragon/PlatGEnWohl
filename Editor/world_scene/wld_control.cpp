@@ -43,6 +43,37 @@ int WgridSize=0, WoffsetX=0, WoffsetY=0;//, gridX, gridY, i=0;
 
 namespace wld_control
 {
+    QList<QGraphicsItem *> collisionCheckBuffer;
+    bool emptyCollisionCheck = false;
+
+    ///
+    /// \brief cleanCollisionBuffer
+    /// Remove trash from collision buffer for crash protection
+    void prepareCollisionBuffer()
+    {
+        for(int i=0; i<collisionCheckBuffer.size(); i++ )
+        {
+            bool kick=false;
+            if(collisionCheckBuffer[i]->data(0).toString()=="YellowRectangle")
+                kick=true;
+            else
+            if(collisionCheckBuffer[i]->data(0).toString()=="Space")
+                kick=true;
+            else
+            if(collisionCheckBuffer[i]->data(0).toString()=="Square")
+                kick=true;
+            else
+            if(collisionCheckBuffer[i]->data(0).toString()=="Line")
+                kick=true;
+            else
+            if(collisionCheckBuffer[i]->data(0).toString().startsWith("BackGround"))
+                kick=true;
+
+            if(kick) {collisionCheckBuffer.removeAt(i); i--;}
+        }
+    }
+
+
     bool mouseLeft=false; //Left mouse key is pressed
     bool mouseMid=false;  //Middle mouse key is pressed
     bool mouseRight=false;//Right mouse key is pressed
@@ -191,6 +222,7 @@ void WldScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
                                                    WldPlacingItems::gridOffset)));
             }
             placeItemUnderCursor();
+            Debugger_updateItemList();
             QGraphicsScene::mousePressEvent(mouseEvent);
             return;
             break;
@@ -291,6 +323,7 @@ void WldScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             if (!selectedList.isEmpty())
             {
                 removeItemUnderCursor();
+                Debugger_updateItemList();
                 EraserEnabled=true;
             }
             break;
@@ -401,7 +434,11 @@ void WldScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
                                                          WldPlacingItems::gridOffset)));
                        cursor->show();
             }
-            if( mouseEvent->buttons() & Qt::LeftButton ) placeItemUnderCursor();
+            if( mouseEvent->buttons() & Qt::LeftButton )
+            {
+                placeItemUnderCursor();
+                Debugger_updateItemList();
+            }
             QGraphicsScene::mouseMoveEvent(mouseEvent);
             break;
         }
@@ -494,7 +531,10 @@ void WldScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
         {
             if(cursor) cursor->setPos(mouseEvent->scenePos());
             if (EraserEnabled)// Remove All items, placed under Cursor
+            {
                 removeItemUnderCursor();
+                Debugger_updateItemList();
+            }
             break;
         }
     default:
@@ -568,6 +608,7 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
         {
             clearSelection();
             paste( WldBuffer, mouseEvent->scenePos().toPoint() );
+            Debugger_updateItemList();
             PasteFromBuffer = false;
         }
 
@@ -597,7 +638,26 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                 cursor->hide();
                 break;
             }
+            QPointF p = ((QGraphicsRectItem *)cursor)->scenePos();
+            QSizeF s = ((QGraphicsRectItem *)cursor)->rect().size();
+
+            collisionCheckBuffer = this->items(QRectF(
+                        p.x()-10, p.y()-10,
+                        s.width()+20, s.height()+20),
+                        Qt::IntersectsItemBoundingRect);
+
+            if(collisionCheckBuffer.isEmpty())
+                emptyCollisionCheck = true;
+            else
+                prepareCollisionBuffer();
+
             placeItemsByRectArray();
+
+            Debugger_updateItemList();
+
+            emptyCollisionCheck = false;
+            collisionCheckBuffer.clear();
+
             WldData->modified = true;
             cursor->hide();
         }
@@ -609,6 +669,7 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
         if(cursor)
         {
             placeItemsByRectArray();
+            Debugger_updateItemList();
             WldData->modified = true;
             cursor->hide();
         }
@@ -683,6 +744,7 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
             if(PasteFromBuffer)
             {
                 paste( WldBuffer, mouseEvent->scenePos().toPoint() );
+                Debugger_updateItemList();
                 PasteFromBuffer = false;
                 mouseMoved=false;
                 MainWinConnect::pMainWin->on_actionSelect_triggered();
@@ -700,8 +762,11 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                 if(EditingMode==MODE_Erasing)
                 {
                     removeWldItems(selectedList);
+                    Debugger_updateItemList();
                 }
                 else
+                    applyGroupGrid(selectedList);
+                /*
                 // correct selected items' coordinates
                 for (QList<QGraphicsItem*>::iterator it = selectedList.begin(); it != selectedList.end(); it++)
                 { ////////////////////////FIRST FETCH///////////////////////
@@ -735,18 +800,33 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                     //////////////////////////////////////////////////////////////////
 
                 } ////////////////////////FIRST FETCH///////////////////////
-
-                selectedList = selectedItems();
+                */
+                //selectedList = selectedItems();
 
                 if((EditingMode==MODE_Erasing)&&(deleted))
                 {
                     addRemoveHistory(historyBuffer);
+                    Debugger_updateItemList();
                 }
                 EraserEnabled = false;
 
                 // Check collisions
                 //Only if collision ckecking enabled
                 if(!PasteFromBuffer)
+                {
+                    if(opts.collisionsEnabled && checkGroupCollisions(&selectedList))
+                    {
+                        collisionPassed = false;
+                        returnItemBackGroup(selectedList);
+                    }
+                    else
+                    {
+                        collisionPassed = true;
+                        //applyArrayForItemGroup(selectedList);
+                        WldData->modified=true;
+                    }
+                }
+                /*
                 for (QList<QGraphicsItem*>::iterator it = selectedList.begin(); it != selectedList.end(); it++)
                 { ////////////////////////SECOND FETCH///////////////////////
                     ObjType = (*it)->data(0).toString();
@@ -775,19 +855,34 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                             collisionPassed = false;
                             (*it)->setPos(QPointF(WsourcePos));
                             (*it)->setSelected(false);
-                            /*
+
                             WriteToLog(QtDebugMsg, QString("Moved back %1 %2")
                                        .arg((long)(*it)->scenePos().x())
-                                       .arg((long)(*it)->scenePos().y()) );*/
+                                       .arg((long)(*it)->scenePos().y()) );
                         }
                         else
                         {
                             collisionPassed = true;
                         }
                     }
+                    */
 
                     if((collisionPassed) || (!opts.collisionsEnabled))
-                    {
+                    for (QList<QGraphicsItem*>::iterator it = selectedList.begin(); it != selectedList.end(); it++)
+                    { ////////////////////////SECOND FETCH///////////////////////
+                       ObjType = (*it)->data(0).toString();
+
+                       /////////////////////////GET DATA///////////////
+                        setItemSourceData((*it), (*it)->data(0).toString()); //Set Grid Size/Offset, sourcePosition
+                       /////////////////////////GET DATA/////////////////////
+
+                        //Check position
+                        if( (WsourcePos == QPoint((long)((*it)->scenePos().x()), ((long)(*it)->scenePos().y()))))
+                        {
+                            mouseMoved=false;
+                            break; //break fetch when items is not moved
+                        }
+
                         if( ObjType == "TILE")
                         {
                             //Applay move into main array
@@ -844,7 +939,8 @@ void WldScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                         }
 
                     }
-                }////////////////////////SECOND FETCH///////////////////////
+                //}
+                ////////////////////////SECOND FETCH///////////////////////
 
                 if((EditingMode==MODE_Selecting)&&(mouseMoved)) addMoveHistory(historySourceBuffer, historyBuffer);
 
@@ -910,6 +1006,7 @@ void WldScene::setItemSourceData(QGraphicsItem * it, QString ObjType)
 
 void WldScene::placeItemsByRectArray()
 {
+    using namespace wld_control;
     //This function placing items by yellow rectangles
     if(item_rectangles::rectArray.isEmpty()) return;
 
@@ -1015,7 +1112,13 @@ void WldScene::placeItemUnderCursor()
         }
     }
 
-    if( itemCollidesWith(cursor) )
+    QList<QGraphicsItem *> * checkZone;
+    if(collisionCheckBuffer.isEmpty())
+        checkZone = NULL;
+    else
+        checkZone = &collisionCheckBuffer;
+
+    if( !emptyCollisionCheck && itemCollidesWith(cursor, checkZone) )
     {
         return;
     }
@@ -1116,6 +1219,7 @@ void WldScene::removeSelectedWldItems()
     QList<QGraphicsItem*> selectedList = selectedItems();
     if(selectedList.isEmpty()) return;
     removeWldItems(selectedList);
+    Debugger_updateItemList();
 }
 
 void WldScene::removeWldItem(QGraphicsItem * item, bool globalHistory)

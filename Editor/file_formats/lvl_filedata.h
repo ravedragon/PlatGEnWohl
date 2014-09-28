@@ -62,7 +62,7 @@ struct LevelBlock
     long h;
     long w;
     unsigned long id; //Block ID
-    unsigned long npc_id;
+    long npc_id;
     bool invisible;
     bool slippery;
     QString layer;
@@ -275,6 +275,7 @@ struct LevelData
     bool playmusic;
     bool modified;
     bool untitled;
+    bool smbx64strict;
     QString filename;
     QString path;
 };

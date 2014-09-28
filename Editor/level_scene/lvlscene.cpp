@@ -17,6 +17,8 @@
  */
 
 #include "lvlscene.h"
+#include "../common_features/app_path.h"
+
 #include "../edit_level/level_edit.h"
 
 #include "item_block.h"
@@ -71,27 +73,38 @@ LvlScene::LvlScene(dataconfigs &configs, LevelData &FileData, QObject *parent) :
     resetCursor();
 
     //set dummy images if target not exist or wrong
-    uBlockImg = QPixmap(QApplication::applicationDirPath() + "/" + "data/unknown_block.png");
-    uNpcImg = QPixmap(QApplication::applicationDirPath() + "/" + "data/unknown_npc.png");
-    uBgoImg = QPixmap(QApplication::applicationDirPath() + "/" + "data/unknown_bgo.png");
+    uBlockImg = QPixmap(ApplicationPath + "/" + "data/unknown_block.png");
+    uNpcImg = QPixmap(ApplicationPath + "/" + "data/unknown_npc.png");
+    uBgoImg = QPixmap(ApplicationPath + "/" + "data/unknown_bgo.png");
 
 
     //set Default Z Indexes
-    bgZ = -1000;
-    blockZs = -150; // sizable blocks
-    bgoZb = -100; // backround BGO
+    Z_backImage = -1000; //Background
 
-    blockZ = 1; // standart block
-    npcZb = 20; // background NPC
-    npcZs = 30; // standart NPC
-    playerZ = 35; //player Point
-    bgoZf = 50; // foreground BGO
-    blockZl = 100; //LavaBlock
-    npcZf = 150; // foreground NPC
-    waterZ = 500;
-    doorZ = 700;
-    spaceZ1 = 1000; // interSection space layer
-    spaceZ2 = 1020; // section Border
+    //Background-2
+    Z_BGOBack2 = -160; // backround BGO
+
+    Z_blockSizable = -150; // sizable blocks
+
+    //Background-1
+    Z_BGOBack1 = -100; // backround BGO
+
+    Z_Block = 1; // standart block
+    Z_npcBack = 20; // background NPC
+    Z_npcStd = 30; // standart NPC
+    Z_Player = 35; //player Point
+
+    //Foreground-1
+    Z_BGOFore1 = 50; // foreground BGO
+    Z_BlockFore = 100; //LavaBlock
+    Z_npcFore = 150; // foreground NPC
+    //Foreground-2
+    Z_BGOFore2 = 160; // foreground BGO
+
+    Z_sys_PhysEnv = 500;
+    Z_sys_door = 700;
+    Z_sys_interspace1 = 1000; // interSection space layer
+    Z_sys_sctBorder = 1020; // section Border
 
     //HistoryIndex
     historyIndex=0;

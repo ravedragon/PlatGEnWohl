@@ -22,6 +22,9 @@
 #include <QRegExp>
 #include <QString>
 #include <QFile>
+#include <QTextStream>
+#include <QTextCodec>
+#include <QMessageBox>
 
 
 #include "lvl_filedata.h"
@@ -62,31 +65,16 @@ public:
     PGEFile() {}
 
     // /////////////Validators///////////////
-    //returns TRUE on wrong data
-    //static bool Int(QString in); // UNSIGNED INT
-    //static bool sInt(QString in); // SIGNED INT
-
-    //static bool Float(QString in); // UNSIGNED FLOAT
-    //static bool sFloat(QString in); // SIGNED FLOAT
-
-    //static bool Bool(QString in); //Digit BOOL
-
-    //static bool qStr(QString in); // QUOTED STRING
-    //static bool heStr(QString in); // Hex Encoded String
-
-    //static bool intArray(QString in); //Integer array
-    //static bool strArray(QString in); //String array
-    //static bool BoolArray(QString in); //Bool array
-
-    static bool IsQStr(QString in);
-    static bool IsHex(QString in);
-    static bool IsIntU(QString in);
-    static bool IsIntS(QString in);
-    static bool IsFloat(QString in);
-    static bool IsBool(QString in);
-    static bool IsBoolArray(QString in);
-    static bool IsIntArray(QString in);
-    static bool IsStringArray(QString in);
+    //returns TRUE on valid data
+    static bool IsQStr(QString in);// QUOTED STRING
+    static bool IsHex(QString in);// Hex Encoded String
+    static bool IsIntU(QString in);// UNSIGNED INT
+    static bool IsIntS(QString in);// SIGNED INT
+    static bool IsFloat(QString in);// FLOAT
+    static bool IsBool(QString in);//BOOL
+    static bool IsBoolArray(QString in);//Boolean array
+    static bool IsIntArray(QString in);//Integer array
+    static bool IsStringArray(QString in);//String array
 
     //Split string into data values
     static QList<QStringList> splitDataLine(QString src_data, bool *valid = 0);
@@ -94,7 +82,7 @@ public:
     //PGE Extended File parameter string generators
     static QString IntS(long input);
     static QString BoolS(bool input);
-    static QString FloatS(float input);
+    static QString FloatS(double input);
     static QString qStrS(QString input);
     static QString hStrS(QString input);
     static QString strArrayS(QStringList input);
@@ -102,6 +90,8 @@ public:
     static QString BoolArrayS(QList<bool > input);
 
     static QString X2STR(QString input);
+    static QStringList X2STRArr(QString src);
+    static QList<bool> X2BollArr(QString src);
 
     static QString escapeStr(QString input);
     static QString restoreStr(QString input);
@@ -116,15 +106,25 @@ public:
 class FileFormats
 {
 public:
-    //File format read functions
+    //File format read/write functions
 
-    static LevelData dummyLvlDataArray();                   //Create new
+    static LevelData dummyLvlDataArray();                    //Create new
     // SMBX64 LVL File
-    static LevelData ReadLevelFile(QFile &inf);             //read
-    static QString WriteSMBX64LvlFile(LevelData FileData);  //write
+    static LevelData ReadLevelFile(QFile &inf);              //read
+    static QString WriteSMBX64LvlFile(LevelData FileData);   //write
     // PGE Extended Level File
-    static LevelData ReadExtendedLevelFile(QFile &inf);
+    static LevelData ReadExtendedLevelFile(QFile &inf);      //read
     static QString WriteExtendedLvlFile(LevelData FileData); //Write
+
+
+    static WorldData dummyWldDataArray();                    //Create new
+    // SMBX64 WLD File
+    static WorldData ReadWorldFile(QFile &inf);              //read
+    static QString WriteSMBX64WldFile(WorldData FileData);   //Write
+
+    // PGE Extended World map File
+    static WorldData ReadExtendedWorldFile(QFile &inf);      //read
+    static QString WriteExtendedWldFile(WorldData FileData); //Write
 
     // Lvl Data
     static LevelNPC dummyLvlNpc();
@@ -151,16 +151,10 @@ public:
     static NPCConfigFile CreateEmpytNpcTXTArray();
     static obj_npc mergeNPCConfigs(obj_npc &global, NPCConfigFile &local, QSize captured=QSize(0,0));
 
-    // SMBX64 WLD File
-    static WorldData ReadWorldFile(QFile &inf);             //read
-    static QString WriteSMBX64WldFile(WorldData FileData);  //Write
-    static WorldData dummyWldDataArray();                   //Create new
-
 
     //common
     static void BadFileMsg(QString fileName_DATA, int str_count, QString line);
     static QString removeQuotes(QString str); // Remove quotes from begin and end
-
 };
 
 #endif // FILE_FORMATS_H

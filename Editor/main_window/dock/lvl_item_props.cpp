@@ -104,6 +104,7 @@ void MainWindow::LvlItemProps(int Type, LevelBlock block, LevelBGO bgo, LevelNPC
 
             LvlPlacingItems::blockSet.layer = LvlPlacingItems::layer.isEmpty()? "Default":LvlPlacingItems::layer;
             block.layer = LvlPlacingItems::layer.isEmpty()? "Default":LvlPlacingItems::layer;
+            LvlPlacingItems::layer = block.layer;
         }
 
 
@@ -174,6 +175,7 @@ void MainWindow::LvlItemProps(int Type, LevelBlock block, LevelBGO bgo, LevelNPC
         {
             LvlPlacingItems::bgoSet.layer = LvlPlacingItems::layer.isEmpty()? "Default":LvlPlacingItems::layer;
             bgo.layer = LvlPlacingItems::layer.isEmpty()? "Default":LvlPlacingItems::layer;
+            LvlPlacingItems::layer = bgo.layer;
         }
 
         ui->PROPS_BgoID->setText(tr("BGO ID: %1, Array ID: %2").arg(bgo.id).arg(bgo.array_id));
@@ -189,6 +191,34 @@ void MainWindow::LvlItemProps(int Type, LevelBlock block, LevelBGO bgo, LevelNPC
             if(ui->PROPS_BGOLayer->itemText(i)==bgo.layer)
             {ui->PROPS_BGOLayer->setCurrentIndex(i); break;}
         }
+
+        //PGE-X values
+            bool isPGE=true;
+            if(activeChildWindow()==1)
+                isPGE = !activeLvlEditWin()->LvlData.smbx64strict;
+
+            ui->PROPS_BGO_Z_Pos->setEnabled(isPGE);
+
+            int zMode=2;
+            switch(bgo.z_mode)
+            {
+                case LevelBGO::Background2:
+                    zMode=0; break;
+                case LevelBGO::Background1:
+                    zMode=1; break;
+                case LevelBGO::Foreground1:
+                    zMode=3; break;
+                case LevelBGO::Foreground2:
+                    zMode=4; break;
+                case LevelBGO::ZDefault:
+                default:
+                    zMode=2; break;
+            }
+
+            ui->PROPS_BGO_Z_Layer->setCurrentIndex(zMode);
+
+            ui->PROPS_BGO_Z_Offset->setValue( bgo.z_offset );
+        //PGE-X values
 
         ui->PROPS_BGO_smbx64_sp->setValue( bgo.smbx64_sp );
 
@@ -279,6 +309,7 @@ void MainWindow::LvlItemProps(int Type, LevelBlock block, LevelBGO bgo, LevelNPC
 
             LvlPlacingItems::npcSet.layer = LvlPlacingItems::layer.isEmpty()? "Default":LvlPlacingItems::layer;
             npc.layer = LvlPlacingItems::layer.isEmpty()? "Default":LvlPlacingItems::layer;
+            LvlPlacingItems::layer = npc.layer;
         }
 
         ui->PROPS_NpcPos->setText( tr("Position: [%1, %2]").arg(npc.x).arg(npc.y) );
@@ -805,6 +836,7 @@ void MainWindow::on_PROPS_BlockLayer_currentIndexChanged(const QString &arg1)
     if(blockPtr<0)
     {
         LvlPlacingItems::blockSet.layer = arg1;
+        LvlPlacingItems::layer = arg1;
     }
     else
     if (activeChildWindow()==1)
@@ -960,6 +992,7 @@ void MainWindow::on_PROPS_BGOLayer_currentIndexChanged(const QString &arg1)
     if(bgoPtr<0)
     {
         LvlPlacingItems::bgoSet.layer = arg1;
+        LvlPlacingItems::layer = arg1;
     }
     else
     if (activeChildWindow()==1)
@@ -978,6 +1011,82 @@ void MainWindow::on_PROPS_BGOLayer_currentIndexChanged(const QString &arg1)
         activeLvlEditWin()->scene->addChangedLayerHistory(modData, arg1);
     }
 
+}
+
+
+
+void MainWindow::on_PROPS_BGO_Z_Layer_currentIndexChanged(int index)
+{
+    if(LvlItemPropsLock) return;
+    if(LockItemProps) return;
+
+    int zMode=0;
+    switch(index)
+    {
+    case 0:
+        zMode = LevelBGO::Background2; break;
+    case 1:
+        zMode = LevelBGO::Background1; break;
+    case 3:
+        zMode = LevelBGO::Foreground1; break;
+    case 4:
+        zMode = LevelBGO::Foreground2; break;
+    case 2:
+    default:
+        zMode = LevelBGO::ZDefault; break;
+    }
+
+    if(bgoPtr<0)
+    {
+        LvlPlacingItems::bgoSet.z_mode = zMode;
+    }
+    else
+    if (activeChildWindow()==1)
+    {
+        //LevelData selData;
+        QList<QGraphicsItem *> items = activeLvlEditWin()->scene->selectedItems();
+        foreach(QGraphicsItem * item, items)
+        {
+            if((item->data(0).toString()=="BGO")/*&&((item->data(2).toInt()==bgoPtr))*/)
+            {
+                //selData.bgo.push_back(((ItemBGO*)item)->bgoData);
+                ((ItemBGO*)item)->setZMode(zMode, ((ItemBGO*)item)->bgoData.z_offset);
+                //((ItemBGO*)item)->arrayApply();
+                //break;
+            }
+        }
+        //activeLvlEditWin()->scene->addChangeSettingsHistory(selData, LvlScene::SETTING_BGOSORTING, QVariant(arg1));
+    }
+
+
+}
+
+void MainWindow::on_PROPS_BGO_Z_Offset_valueChanged(double arg1)
+{
+    if(LvlItemPropsLock) return;
+    if(LockItemProps) return;
+
+    if(bgoPtr<0)
+    {
+        LvlPlacingItems::bgoSet.z_offset = arg1;
+    }
+    else
+    if (activeChildWindow()==1)
+    {
+        //LevelData selData;
+        QList<QGraphicsItem *> items = activeLvlEditWin()->scene->selectedItems();
+        foreach(QGraphicsItem * item, items)
+        {
+            if((item->data(0).toString()=="BGO")/*&&((item->data(2).toInt()==bgoPtr))*/)
+            {
+                //selData.bgo.push_back(((ItemBGO*)item)->bgoData);
+                ((ItemBGO*)item)->setZMode( ((ItemBGO*)item)->bgoData.z_mode, arg1);
+                //((ItemBGO*)item)->arrayApply();
+                //break;
+            }
+        }
+        //activeLvlEditWin()->scene->addChangeSettingsHistory(selData, LvlScene::SETTING_BGOSORTING, QVariant(arg1));
+    }
 }
 
 
@@ -1907,6 +2016,7 @@ void MainWindow::on_PROPS_NpcLayer_currentIndexChanged(const QString &arg1)
     if(npcPtr<0)
     {
         LvlPlacingItems::npcSet.layer = arg1;
+        LvlPlacingItems::layer = arg1;
     }
     else
     if (activeChildWindow()==1)

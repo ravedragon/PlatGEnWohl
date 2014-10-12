@@ -149,6 +149,7 @@
     <addaction name="actionSave_all"/>
     <addaction name="separator"/>
     <addaction name="actionExport_to_image"/>
+    <addaction name="actionExport_to_image_section"/>
     <addaction name="separator"/>
     <addaction name="Exit"/>
    </widget>
@@ -2674,9 +2675,9 @@ p, li { white-space: pre-wrap; }
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-274</y>
           <width>279</width>
-          <height>1319</height>
+          <height>1364</height>
          </rect>
         </property>
         <attribute name="label">
@@ -2943,67 +2944,7 @@ p, li { white-space: pre-wrap; }
             <property name="spacing">
              <number>1</number>
             </property>
-            <item row="7" column="1">
-             <widget class="QLabel" name="SMBX64_SP_Help">
-              <property name="maximumSize">
-               <size>
-                <width>175</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>This is a sorting array priority. With this option you can make this BGO as Foreground. (if value set to -1: will be used default value from global BGO config).
-This option using the SMBX's bug of BGO rendering. For this can be works, you need to place any Foreground BGO. This option will not be saved in LVL file, and you need set them secondary after reload of the file.</string>
-              </property>
-              <property name="wordWrap">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0" colspan="2">
-             <widget class="Line" name="line_4">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="BgoLayerLabel">
-              <property name="text">
-               <string>Layer:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QComboBox" name="PROPS_BGOLayer">
-              <item>
-               <property name="text">
-                <string notr="true">CurrentLayer</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="SortPriorityLabel">
-              <property name="text">
-               <string>Sort priority:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QSpinBox" name="PROPS_BGO_smbx64_sp">
-              <property name="minimum">
-               <number>-1</number>
-              </property>
-              <property name="maximum">
-               <number>999999999</number>
-              </property>
-              <property name="singleStep">
-               <number>1</number>
-              </property>
-             </widget>
-            </item>
-            <item row="7" column="0">
+            <item row="8" column="0">
              <spacer name="horizontalSpacer">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -3016,7 +2957,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
               </property>
              </spacer>
             </item>
-            <item row="5" column="0" colspan="2">
+            <item row="6" column="0" colspan="2">
              <widget class="QLabel" name="SMBX64title">
               <property name="font">
                <font>
@@ -3046,7 +2987,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
               </property>
              </widget>
             </item>
-            <item row="8" column="0" colspan="2">
+            <item row="9" column="0" colspan="2">
              <spacer name="verticalSpacer_14">
               <property name="orientation">
                <enum>Qt::Vertical</enum>
@@ -3059,11 +3000,139 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
               </property>
              </spacer>
             </item>
+            <item row="7" column="1">
+             <widget class="QSpinBox" name="PROPS_BGO_smbx64_sp">
+              <property name="minimum">
+               <number>-1</number>
+              </property>
+              <property name="maximum">
+               <number>999999999</number>
+              </property>
+              <property name="singleStep">
+               <number>1</number>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0">
+             <widget class="QLabel" name="SortPriorityLabel">
+              <property name="text">
+               <string>Sort priority:</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0" colspan="2">
              <widget class="QLabel" name="PROPS_BgoID">
               <property name="text">
                <string notr="true">BgoID: [z]</string>
               </property>
+             </widget>
+            </item>
+            <item row="8" column="1">
+             <widget class="QLabel" name="SMBX64_SP_Help">
+              <property name="maximumSize">
+               <size>
+                <width>175</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>This is a sorting array priority. With this option you can make this BGO as Foreground. (if value set to -1: will be used default value from global BGO config).
+This option using the SMBX's bug of BGO rendering. For this can be works, you need to place any Foreground BGO. This option will not be saved in LVL file, and you need set them secondary after reload of the file.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" colspan="2">
+             <widget class="Line" name="line_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="BgoLayerLabel">
+              <property name="text">
+               <string>Layer:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="PROPS_BGOLayer">
+              <item>
+               <property name="text">
+                <string notr="true">CurrentLayer</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="2">
+             <widget class="QGroupBox" name="PROPS_BGO_Z_Pos">
+              <property name="title">
+               <string>Z-Position</string>
+              </property>
+              <layout class="QGridLayout" name="PROPS_BGO_Z_POS_GRP" columnstretch="0,80,0">
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_89">
+                 <property name="text">
+                  <string>Z-Offset:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_88">
+                 <property name="text">
+                  <string>Z-Layer:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QComboBox" name="PROPS_BGO_Z_Layer">
+                 <property name="currentIndex">
+                  <number>2</number>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Background-2</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Background</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Default</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Foreground</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Foreground-2</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QDoubleSpinBox" name="PROPS_BGO_Z_Offset">
+                 <property name="decimals">
+                  <number>7</number>
+                 </property>
+                 <property name="minimum">
+                  <double>-500.000000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>500.000000000000000</double>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </widget>
             </item>
            </layout>
@@ -3859,7 +3928,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>500</height>
+          <height>447</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4042,7 +4111,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>500</height>
+          <height>447</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4124,7 +4193,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>500</height>
+          <height>447</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4217,8 +4286,8 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>272</width>
-          <height>500</height>
+          <width>255</width>
+          <height>461</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4516,7 +4585,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>500</height>
+          <height>447</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4632,7 +4701,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>500</height>
+          <height>447</height>
          </rect>
         </property>
         <attribute name="label">
@@ -4730,7 +4799,7 @@ This option using the SMBX's bug of BGO rendering. For this can be works, you ne
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>500</height>
+          <height>447</height>
          </rect>
         </property>
         <attribute name="label">
@@ -8897,6 +8966,14 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Semi-transparent paths</string>
+   </property>
+  </action>
+  <action name="actionExport_to_image_section">
+   <property name="text">
+    <string>Export section to image...</string>
+   </property>
+   <property name="toolTip">
+    <string>Export whole level section to image</string>
    </property>
   </action>
  </widget>

@@ -40,8 +40,45 @@
 
 #include <QDebug>
 
+
+//Export whole section
 void leveledit::ExportToImage_fn()
 {
+    if(!sceneCreated) return;
+    if(!scene) return;
+
+    scene->setScreenshotSelector();
+}
+
+
+//Export piece
+void leveledit::ExportToImage_fn_piece()
+{
+    if(!sceneCreated) return;
+    if(!scene) return;
+
+    MainWinConnect::pMainWin->on_actionSelect_triggered();
+
+    qreal zoom=1.0;
+    if(QString(ui->graphicsView->metaObject()->className())=="GraphicsWorkspace")
+    {
+        zoom = static_cast<GraphicsWorkspace *>(ui->graphicsView)->zoom();
+    }
+
+    scene->captutedSize.setX(qRound(qreal(ui->graphicsView->horizontalScrollBar()->value())/zoom)+10 );
+    scene->captutedSize.setY(qRound(qreal(ui->graphicsView->verticalScrollBar()->value())/zoom)+10 );
+    scene->captutedSize.setWidth(qRound(qreal(ui->graphicsView->viewport()->width())/zoom)-20);
+    scene->captutedSize.setHeight(qRound(qreal(ui->graphicsView->viewport()->height())/zoom)-20);
+
+    scene->setScreenshotSelector(true);
+}
+
+
+void leveledit::ExportingReady() //slot
+{
+    if(!sceneCreated) return;
+    if(!scene) return;
+
         long x, y, h, w, th, tw;
 
         bool proportion;
@@ -54,12 +91,22 @@ void leveledit::ExportToImage_fn()
         settings.endGroup();
 
 
-        x=LvlData.sections[LvlData.CurSection].size_left;
-        y=LvlData.sections[LvlData.CurSection].size_top;
-        w=LvlData.sections[LvlData.CurSection].size_right;
-        h=LvlData.sections[LvlData.CurSection].size_bottom;
-        w=(long)fabs(x-w);
-        h=(long)fabs(y-h);
+        if(scene->isFullSection)
+        {
+            x=LvlData.sections[LvlData.CurSection].size_left;
+            y=LvlData.sections[LvlData.CurSection].size_top;
+            w=LvlData.sections[LvlData.CurSection].size_right;
+            h=LvlData.sections[LvlData.CurSection].size_bottom;
+            w=(long)fabs(x-w);
+            h=(long)fabs(y-h);
+        }
+        else
+        {
+            x=qRound(scene->captutedSize.x());
+            y=qRound(scene->captutedSize.y());
+            w=qRound(scene->captutedSize.width());
+            h=qRound(scene->captutedSize.height());
+        }
 
         tw=w;
         th=h;
@@ -82,7 +129,10 @@ void leveledit::ExportToImage_fn()
 
         QString fileName = QFileDialog::getSaveFileName(this, tr("Export current section to image"),
             latest_export_path + "/" +
-            QString("%1_Section_%2.png").arg( QFileInfo(curFile).baseName() ).arg(LvlData.CurSection+1), tr("PNG Image (*.png)"));
+            QString("%1_Section_%2%3.png").arg( QFileInfo(curFile).baseName() )
+                                                        .arg(LvlData.CurSection+1)
+                                                        .arg(scene->isFullSection?"":("_"+QString::number(qrand()))),
+                                                        tr("PNG Image (*.png)"));
         if (fileName.isEmpty())
             return;
 
@@ -201,6 +251,7 @@ void leveledit::newFile(dataconfigs &configs, LevelEditingSettings options)
     {
         ui->graphicsView->setScene(scene);
         sceneCreated = true;
+        connect(scene, SIGNAL(screenshotSizeCaptured()), this, SLOT(ExportingReady()));
     }
 
     if(options.animationEnabled) scene->startBlockAnimation();
@@ -315,6 +366,16 @@ bool leveledit::saveFile(const QString &fileName, const bool addToRecent)
     }
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    //Mark stars
+    for(int q=0; q< LvlData.npc.size(); q++)
+    {
+       if( LvlData.npc[q].id < (unsigned long) MainWinConnect::pMainWin->configs.index_npc.size() )
+           LvlData.npc[q].is_star =
+                   MainWinConnect::pMainWin->configs.
+                   main_npc[MainWinConnect::pMainWin->configs.index_npc[LvlData.npc[q].id].gi-1].is_star;
+    }
+
     // ////////////////////// Write SMBX64 LVL //////////////////////////////
     if(fileName.endsWith(".lvl", Qt::CaseInsensitive))
     {
@@ -362,13 +423,13 @@ bool leveledit::saveFile(const QString &fileName, const bool addToRecent)
             isSMBX64limit=true;
         }
         //Physical Environment zones
-        if(LvlData.physez.size()>400)
+        if(LvlData.physez.size()>450)
         {
             QMessageBox::warning(this, tr("The SMBX64 limit has been exceeded"),
              tr("SMBX64 standard isn't allow to save %1 Water Boxes\n"
                 "The maximum number of Water Boxes is %2.\n\n"
                 "Please remove excess Water Boxes from this level or save file into LVLX format.")
-             .arg(LvlData.physez.size()).arg(400), QMessageBox::Ok);
+             .arg(LvlData.physez.size()).arg(450), QMessageBox::Ok);
             isSMBX64limit=true;
         }
         //Layers limits

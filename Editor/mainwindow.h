@@ -128,6 +128,9 @@ public:
         void openFilesByArgs(QStringList args);
 
         void showStatusMsg(QString msg, int time=2000); //Send status message
+        void showToolTipMsg(QString msg, QPoint pos, int time); //Show tooltip msg
+
+        void applyTheme(QString themeDir="");
 
         ///
         /// \brief loadSettings load settings from configuration file
@@ -195,6 +198,7 @@ public:
         void on_actionSave_all_triggered();
 
         void on_actionExport_to_image_triggered();      //!< Export current workspace into image
+        void on_actionExport_to_image_section_triggered();
 
         void on_actionApplication_settings_triggered(); //!< Open application settings
 
@@ -560,6 +564,8 @@ public:
 
         void on_PROPS_BGOLayer_currentIndexChanged(const QString &arg1);
         void on_PROPS_BGOSquareFill_clicked(bool checked);
+        void on_PROPS_BGO_Z_Layer_currentIndexChanged(int index);
+        void on_PROPS_BGO_Z_Offset_valueChanged(double arg1);
         void on_PROPS_BGO_smbx64_sp_valueChanged(int arg1);
 
         void on_PROPS_NPCDirLeft_clicked();

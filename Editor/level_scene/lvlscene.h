@@ -197,8 +197,8 @@ public:
     int Z_BGOBack2; // backround BGO
     int Z_blockSizable; // sizeble block
     int Z_BGOBack1; // backround BGO
-    int Z_Block; // standart block
     int Z_npcBack; // background NPC (vines)
+    int Z_Block; // standart block
     int Z_npcStd; // standart NPC
     int Z_Player; //playerPointZ
     int Z_BGOFore1; // foreground BGO
@@ -218,6 +218,11 @@ public:
     void setEventSctSizeResizer(long event, bool enabled, bool accept=false);
     void setBlockResizer(QGraphicsItem *targetBlock, bool enabled, bool accept=false);
     void setPhysEnvResizer(QGraphicsItem * targetRect, bool enabled, bool accept=false);
+
+    void setScreenshotSelector();  //!<Capture full section size
+    void setScreenshotSelector(bool enabled, bool accept = false); //!<Capture fragment
+    QRectF captutedSize;  //!<Rectangle of scene
+    bool isFullSection;   //!<Selected fragment or whole section
 
     void resetResizers();
     void applyResizers();
@@ -549,6 +554,9 @@ public:
 
 public slots:
     void selectionChanged();
+
+signals:
+    void screenshotSizeCaptured();
 
 protected:
     //void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);

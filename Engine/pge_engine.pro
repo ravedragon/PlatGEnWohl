@@ -4,8 +4,10 @@
 #
 #-------------------------------------------------
 
-QT += core gui
+QT += core gui opengl
 #QT += widgets
+
+DESTDIR = ../bin
 
 TARGET = pge_engine
 TEMPLATE = app
@@ -19,6 +21,8 @@ LIBS += -lSDL2
 win32: LIBS += -lSDL2main
 win32: LIBS += libversion
 unix:  LIBS += -lglut -lGLU
+
+RC_FILE = _resources/engine.rc
 
 SOURCES += main.cpp \
     ../_Libs/Box2D/Collision/Shapes/b2ChainShape.cpp \
@@ -78,8 +82,35 @@ SOURCES += main.cpp \
     ../Editor/file_formats/pge_x.cpp \
     ../Editor/file_formats/smbx64.cpp \
     ../Editor/file_formats/wld_filedata.cpp \
-    graphics.cpp \
-    init.cpp
+    physics/base_object.cpp \
+    physics/phys_util.cpp \
+    graphics/lvl_camera.cpp \
+    graphics/graphics.cpp \
+    scenes/scene_title.cpp \
+    scenes/scene_level.cpp \
+    scenes/scene.cpp \
+    scenes/scene_world.cpp \
+    scenes/scene_credits.cpp \
+    scenes/scene_gameover.cpp \
+    scenes/scene_intro.cpp \
+    graphics/gl_renderer.cpp \
+    graphics/window.cpp \
+    graphics/graphics_lvl_backgrnd.cpp \
+    controls/controllable_object.cpp \
+    controls/controller.cpp \
+    scenes/level/lvl_player.cpp \
+    controls/control_keys.cpp \
+    data_configs/config_manager.cpp \
+    common_features/app_path.cpp \
+    common_features/graphics_funcs.cpp \
+    ../_Libs/EasyBMP/EasyBMP.cpp \
+    scenes/level/lvl_init.cpp \
+    scenes/level/lvl_sections.cpp \
+    data_configs/obj_block.cpp \
+    controls/controller_keyboard.cpp \
+    data_configs/select_config.cpp \
+    common_features/util.cpp \
+    scenes/level/lvl_block.cpp
 
 HEADERS  += \
     ../_Libs/Box2D/Box2D.h \
@@ -133,6 +164,39 @@ HEADERS  += \
     ../Editor/file_formats/lvl_filedata.h \
     ../Editor/file_formats/npc_filedata.h \
     ../Editor/file_formats/wld_filedata.h \
-    graphics.h
+    physics/base_object.h \
+    physics/phys_util.h \
+    graphics/lvl_camera.h \
+    graphics/graphics.h \
+    scenes/scene_title.h \
+    scenes/scene_level.h \
+    scenes/scene.h \
+    scenes/scene_world.h \
+    scenes/scene_credits.h \
+    scenes/scene_gameover.h \
+    scenes/scene_intro.h \
+    graphics/gl_renderer.h \
+    graphics/window.h \
+    controls/controllable_object.h \
+    controls/controller.h \
+    scenes/level/lvl_player.h \
+    controls/control_keys.h \
+    data_configs/config_manager.h \
+    data_configs/obj_block.h \
+    common_features/app_path.h \
+    common_features/graphics_funcs.h \
+    common_features/pge_texture.h \
+    ../_Libs/EasyBMP/EasyBMP.h \
+    ../_Libs/EasyBMP/EasyBMP_BMP.h \
+    ../_Libs/EasyBMP/EasyBMP_DataStructures.h \
+    ../_Libs/EasyBMP/EasyBMP_VariousBMPutilities.h \
+    controls/controller_keyboard.h \
+    data_configs/select_config.h \
+    common_features/util.h \
+    scenes/level/lvl_block.h
 
-FORMS    +=
+FORMS    += \
+    data_configs/select_config.ui
+
+RESOURCES += \
+    _resources/engine.qrc

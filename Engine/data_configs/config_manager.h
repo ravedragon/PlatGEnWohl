@@ -1,13 +1,38 @@
+/*
+ * Platformer Game Engine by Wohlstand, a free platform for game making
+ * Copyright (c) 2014 Vitaly Novichkov <admin@wohlnet.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef CONFIG_MANAGER_H
 #define CONFIG_MANAGER_H
 
 #include "../common_features/app_path.h"
 #include "../common_features/pge_texture.h"
+#include "../common_features/simple_animator.h"
+
 #include "obj_block.h"
+#include "obj_bgo.h"
+#include "obj_bg.h"
+
+
 #include <QMap>
 #include <QSettings>
 #include <QFile>
 
+#include "custom_data.h"
 
 
 struct DataFolders
@@ -142,24 +167,72 @@ public:
     static QVector<obj_sound > main_sound;
 
 
+    static void setConfigPath(QString p);
+    //Load settings
+    static bool loadBasics();
+    static bool unloadLevelConfigs();
+
+
     //Level config Data
+
+    /*****Level blocks************/
+    static bool loadLevelBlocks();
+    static long getBlockTexture(long blockID);
+    /*****************************/
     static QVector<obj_block >     lvl_blocks;
     static QMap<long, obj_block>   lvl_block_indexes;
-    static QVector<PGE_Texture >   level_textures; //Texture bank
-    static PGE_Texture* getBlockTexture(long blockID);
+    static CustomDirManager Dir_Blocks;
+    static QVector<SimpleAnimator *> Animator_Blocks;
+    /*****Level blocks************/
+
+    /*****Level BGO************/
+    static bool loadLevelBGO();
+    static long getBgoTexture(long bgoID);
+    /*****************************/
+    static QVector<obj_bgo >     lvl_bgo;
+    static QMap<long, obj_bgo>   lvl_bgo_indexes;
+    static CustomDirManager Dir_BGO;
+    static QVector<SimpleAnimator *> Animator_BGO;
+    /*****Level BGO************/
 
 
+    /*****Level Backgrounds************/
+    static bool loadLevelBackG();
+    static long getBGTexture(long bgID, bool isSecond=false);
+    /*****************************/
+    static QVector<obj_BG >     lvl_bg;
+    static QMap<long, obj_BG>   lvl_bg_indexes;
+    static CustomDirManager Dir_BG;
+    static QVector<SimpleAnimator *> Animator_BG;
+    /*****Level Backgrounds************/
+
+
+    /***********Texture banks*************/
+    static QVector<PGE_Texture > level_textures;
     static QVector<PGE_Texture > world_textures;
+    /***********Texture banks*************/
 
 
-    static void setConfigPath(QString p);
-    static bool loadBasics();
-
-    static bool loadLevelBlocks();
 
     static void addError(QString bug, QtMsgType level=QtWarningMsg);
 
     static QStringList errorsList;
+
+    static QString PathLevelBGO();
+    static QString PathLevelBG();
+    static QString PathLevelBlock();
+    static QString PathLevelNPC();
+    static QString PathLevelEffect();
+
+    static QString PathCommonGFX();
+
+    static QString PathWorldTiles();
+    static QString PathWorldScenery();
+    static QString PathWorldPaths();
+    static QString PathWorldLevels();
+
+    static QString PathWorldMusic();
+    static QString PathWorldSound();
 
 
 private:
@@ -173,6 +246,7 @@ private:
     static QString BGPath;
     static QString blockPath;
     static QString npcPath;
+    static QString effectPath;
 
     static QString tilePath;
     static QString scenePath;

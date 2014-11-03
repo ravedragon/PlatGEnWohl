@@ -1,3 +1,21 @@
+/*
+ * Platformer Game Engine by Wohlstand, a free platform for game making
+ * Copyright (c) 2014 Vitaly Novichkov <admin@wohlnet.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "../common_features/pge_texture.h"
 #include "config_manager.h"
 
@@ -7,6 +25,7 @@
 #include <QDir>
 #include <QFileInfo>
 
+#include <QtDebug>
 
 ConfigManager::ConfigManager()
 {
@@ -42,9 +61,9 @@ QVector<obj_sound > ConfigManager::main_sound;
 
 
 //Level config Data
-QVector<obj_block >     ConfigManager::lvl_blocks;
-QMap<long, obj_block>   ConfigManager::lvl_block_indexes;
 QVector<PGE_Texture >   ConfigManager::level_textures; //Texture bank
+
+
 
 QVector<PGE_Texture > ConfigManager::world_textures;
 
@@ -58,6 +77,7 @@ QString ConfigManager::bgoPath;
 QString ConfigManager::BGPath;
 QString ConfigManager::blockPath;
 QString ConfigManager::npcPath;
+QString ConfigManager::effectPath;
 
 QString ConfigManager::tilePath;
 QString ConfigManager::scenePath;
@@ -65,31 +85,6 @@ QString ConfigManager::pathPath;
 QString ConfigManager::wlvlPath;
 
 QString ConfigManager::commonGPath;
-
-
-
-
-PGE_Texture*           ConfigManager::getBlockTexture(long blockID)
-{
-    PGE_Texture* target=NULL;
-    if(!lvl_block_indexes.contains(blockID))
-        return target;
-
-    if(lvl_block_indexes[blockID].isInit)
-        return lvl_block_indexes[blockID].image;
-    else
-    {
-        PGE_Texture texture = GraphicsHelps::loadTexture(
-                    blockPath + lvl_block_indexes[blockID].image_n,
-                    blockPath + lvl_block_indexes[blockID].mask_n
-                    );
-        level_textures.push_back(texture);
-        lvl_block_indexes[blockID].image = &(level_textures.last());
-        return lvl_block_indexes[blockID].image;
-    }
-
-}
-
 
 
 
@@ -168,13 +163,14 @@ bool ConfigManager::loadBasics()
     BGPath =    dirs.glevel +  "background2/";
     blockPath = dirs.glevel +  "block/";
     npcPath =   dirs.glevel +  "npc/";
+    effectPath= dirs.glevel +  "effect/";
 
     tilePath =  dirs.gworld +  "tile/";
     scenePath = dirs.gworld +  "scene/";
     pathPath =  dirs.gworld +  "path/";
     wlvlPath =  dirs.gworld +  "level/";
 
-    commonGPath = dirs.gcommon;
+    commonGPath = dirs.gcommon + "/";
     //////////////////////////////////////////////////////////////////////////////////
 
     QString engine_ini = config_dir + "engine.ini";
@@ -291,3 +287,59 @@ void ConfigManager::addError(QString bug, QtMsgType level)
     errorsList<<bug;
 }
 
+
+
+bool ConfigManager::unloadLevelConfigs()
+{
+
+    ///Clear texture bank
+    while(!level_textures.isEmpty())
+    {
+        glDeleteTextures( 1, &(level_textures.last().texture) );
+        level_textures.pop_back();
+    }
+
+
+
+    /***************Clear animators*************/
+    foreach(SimpleAnimator * x, Animator_Blocks)
+        x->stop();
+    while(!Animator_Blocks.isEmpty())
+    {
+        SimpleAnimator * x = Animator_Blocks.first();
+        Animator_Blocks.pop_front();
+        delete x;
+    }
+
+
+    foreach(SimpleAnimator * x, Animator_BGO)
+        x->stop();
+    while(!Animator_BGO.isEmpty())
+    {
+        SimpleAnimator * x = Animator_BGO.first();
+        Animator_BGO.pop_front();
+        delete x;
+    }
+
+    foreach(SimpleAnimator * x, Animator_BG)
+        x->stop();
+    while(!Animator_BG.isEmpty())
+    {
+        SimpleAnimator * x = Animator_BG.first();
+        Animator_BG.pop_front();
+        delete x;
+    }
+
+    /***************Clear settings*************/
+    lvl_block_indexes.clear();
+    lvl_blocks.clear();
+
+    lvl_bgo_indexes.clear();
+    lvl_bgo.clear();
+
+    lvl_bg_indexes.clear();
+    lvl_bg.clear();
+
+    //level_textures.clear();
+    return true;
+}

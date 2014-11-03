@@ -18,11 +18,16 @@
 
 #include <QPixmap>
 #include <QImage>
+#include <QRgb>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QtOpenGL/QGLWidget>
+
+
 #include "graphics_funcs.h"
 #include "../../_Libs/EasyBMP/EasyBMP.h"
+
+#include <QtDebug>
 
 QImage GraphicsHelps::setAlphaMask(QImage image, QImage mask)
 {
@@ -81,10 +86,8 @@ QImage GraphicsHelps::loadQImage(QString file)
     return image;
 }
 
-PGE_Texture GraphicsHelps::loadTexture(QString path, QString maskPath)
+PGE_Texture GraphicsHelps::loadTexture(PGE_Texture &target, QString path, QString maskPath)
 {
-    PGE_Texture target;
-
     QImage sourceImage;
     // Load the OpenGL texture
     sourceImage = loadQImage(path); // Gives us the information to make the texture
@@ -92,10 +95,14 @@ PGE_Texture GraphicsHelps::loadTexture(QString path, QString maskPath)
     if(sourceImage.isNull())
     {
         SDL_Quit();
-        QMessageBox::critical(NULL, "Texture error",
-            QString("Error loading of image file: \n%1\nReason: %2.")
-            .arg(path).arg(QFileInfo(path).exists()?"wrong image format":"file not exist"), QMessageBox::Ok);
-        exit(1);
+        //if(ErrorCheck::hardMode)
+        //{
+            QMessageBox::critical(NULL, "Texture error",
+                QString("Error loading of image file: \n%1\nReason: %2.")
+                .arg(path).arg(QFileInfo(path).exists()?"wrong image format":"file not exist"), QMessageBox::Ok);
+            exit(1);
+        //}
+        return target;
     }
 
     //Apply Alpha mask
@@ -105,6 +112,19 @@ PGE_Texture GraphicsHelps::loadTexture(QString path, QString maskPath)
         sourceImage = setAlphaMask(sourceImage, maskImage);
     }
 
+    sourceImage.convertToFormat(QImage::Format_ARGB32);
+    QRgb upperColor = sourceImage.pixel(0,0);
+    target.ColorUpper.r = float(qRed(upperColor))/255.0f;
+    target.ColorUpper.g = float(qGreen(upperColor))/255.0f;
+    target.ColorUpper.b = float(qBlue(upperColor))/255.0f;
+
+    QRgb lowerColor = sourceImage.pixel(0, sourceImage.height()-1);
+    target.ColorLower.r = float(qRed(lowerColor))/255.0f;
+    target.ColorLower.g = float(qGreen(lowerColor))/255.0f;
+    target.ColorLower.b = float(qBlue(lowerColor))/255.0f;
+
+    //qDebug() << path << sourceImage.size();
+
     sourceImage = QGLWidget::convertToGLFormat(sourceImage).mirrored(false, true);
 
     target.nOfColors = 4;
@@ -112,7 +132,7 @@ PGE_Texture GraphicsHelps::loadTexture(QString path, QString maskPath)
 
     glEnable(GL_TEXTURE_2D);
     // Have OpenGL generate a texture object handle for us
-    glGenTextures( 1, &target.texture );
+    glGenTextures( 1, &(target.texture) );
 
     // Bind the texture object
     glBindTexture( GL_TEXTURE_2D, target.texture );
@@ -134,7 +154,6 @@ PGE_Texture GraphicsHelps::loadTexture(QString path, QString maskPath)
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
     glDisable(GL_TEXTURE_2D);
-
 
     return target;
 }

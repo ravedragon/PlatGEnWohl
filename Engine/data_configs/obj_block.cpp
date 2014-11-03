@@ -1,10 +1,40 @@
+/*
+ * Platformer Game Engine by Wohlstand, a free platform for game making
+ * Copyright (c) 2014 Vitaly Novichkov <admin@wohlnet.ru>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "config_manager.h"
 #include <QMessageBox>
 
-static QString Temp01="";
+/*****Level blocks************/
+QVector<obj_block >     ConfigManager::lvl_blocks;
+QMap<long, obj_block>   ConfigManager::lvl_block_indexes;
+CustomDirManager ConfigManager::Dir_Blocks;
+QVector<SimpleAnimator *> ConfigManager::Animator_Blocks;
+/*****Level blocks************/
+
+namespace loadLevelBlocks_fnc
+{
+    static QString Temp01="";
+}
 
 bool ConfigManager::loadLevelBlocks()
 {
+    using namespace loadLevelBlocks_fnc;
+
     unsigned int i;
 
     obj_block sblock;
@@ -34,8 +64,6 @@ bool ConfigManager::loadLevelBlocks()
     blockset.endGroup();
 
 
-    //creation of empty indexes of arrayElements
-
 
     if(block_total==0)
     {
@@ -49,7 +77,14 @@ bool ConfigManager::loadLevelBlocks()
 
         for(i=1; i<=block_total; i++)
         {
-            blockset.beginGroup( QString("block-%1").arg(i) );
+
+            sblock.isInit=false;
+            sblock.image = NULL;
+            sblock.textureArrayId = 0;
+            sblock.animator_ID = 0;
+
+
+                blockset.beginGroup( QString("block-%1").arg(i) );
 
                 sblock.name = blockset.value("name", QString("block %1").arg(i) ).toString();
 
@@ -63,8 +98,6 @@ bool ConfigManager::loadLevelBlocks()
                 sblock.category = blockset.value("category", "_Other").toString();
                 //sblock.grid = blockset.value("grid", default_grid).toInt();
                 imgFile = blockset.value("image", "").toString();
-
-                sblock.isInit=false;
 
                 sblock.image_n = imgFile;
                 if( (imgFile!="") )
@@ -180,5 +213,6 @@ bool ConfigManager::loadLevelBlocks()
 
        return true;
 }
+
 
 

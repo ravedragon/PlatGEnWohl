@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "lvlscene.h"
+#include "lvl_scene.h"
 #include "../edit_level/level_edit.h"
 
 #include "item_block.h"
@@ -69,6 +69,7 @@ void LvlScene::SwitchEditingMode(int EdtMode)
 
     case MODE_PasteFromClip:
         switchMode("Select");
+        clearSelection();
         disableMoveItems=true;
         _viewPort->setInteractive(true);
         _viewPort->setCursor(QCursor(Themes::Image(Themes::cursor_pasting), 0, 0));

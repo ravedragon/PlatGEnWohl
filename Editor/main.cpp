@@ -33,30 +33,24 @@
 
 #include "common_features/app_path.h"
 #include "common_features/themes.h"
+#include "common_features/crashhandler.h"
 
 #undef main
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #undef main
 
+#include <QFileInfo>
+#include <QDir>
+
 QString ApplicationPath;
 QString ApplicationPath_x;
 
-namespace PGECrashHandler {
-    void crashByFlood(){
-        QMessageBox::warning(nullptr, QApplication::tr("Crash"), QApplication::tr("We're sorry, but PGE has crashed. Reason: Out of memory! :(\n"
-                                                                                  "To prevent this, try closing other uneccessary programs to free up more memory."));
-
-        std::exit(1);
-    }
-}
-
 int main(int argc, char *argv[])
 {
-    std::set_new_handler(PGECrashHandler::crashByFlood);
-    QApplication::addLibraryPath(".");
+    CrashHandler::initCrashHandlers();
 
-
+    QApplication::addLibraryPath( QFileInfo(argv[0]).dir().path() );
 
     QApplication *a = new QApplication(argc, argv);
 

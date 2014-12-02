@@ -32,8 +32,11 @@
 #include "edit_modes/wld_mode_place.h"
 #include "edit_modes/wld_mode_square.h"
 #include "edit_modes/wld_mode_line.h"
+#include "edit_modes/wld_mode_fill.h"
 #include "edit_modes/wld_mode_resize.h"
 #include "edit_modes/wld_mode_setpoint.h"
+
+#include "../common_features/themes.h"
 
 WldScene::WldScene(GraphicsWorkspace * parentView, dataconfigs &configs, WorldData &FileData, QObject *parent) : QGraphicsScene(parent)
 {
@@ -103,12 +106,24 @@ WldScene::WldScene(GraphicsWorkspace * parentView, dataconfigs &configs, WorldDa
     messageBox = NULL;
 
     //set dummy images if target not exist or wrong
-    uTileImg=QPixmap(ApplicationPath + "/" + "data/unknown_tile.png");
-    uSceneImg=QPixmap(ApplicationPath + "/" + "data/unknown_scene.png");
-    uPathImg=QPixmap(ApplicationPath + "/" + "data/unknown_path.png");
-    uLevelImg=QPixmap(ApplicationPath + "/" + "data/unknown_wlvl.png");
+    uTileImg    = Themes::Image(Themes::dummy_tile);
+    uSceneImg   = Themes::Image(Themes::dummy_scenery);
+    uPathImg    = Themes::Image(Themes::dummy_path);
+    uLevelImg   = Themes::Image(Themes::dummy_wlevel);
 
-    musicBoxImg=QPixmap(ApplicationPath + "/" + "data/music_box.png");
+    musicBoxImg = Themes::Image(Themes::dummy_musicbox);
+
+    //Build animators for dummies
+    SimpleAnimator * tmpAnimator;
+        tmpAnimator = new SimpleAnimator(uTileImg, 0);
+    animates_Tiles.push_back( tmpAnimator );
+        tmpAnimator = new SimpleAnimator(uSceneImg, 0);
+    animates_Scenery.push_back( tmpAnimator );
+        tmpAnimator = new SimpleAnimator(uPathImg, 0);
+    animates_Paths.push_back( tmpAnimator );
+        tmpAnimator = new SimpleAnimator(uLevelImg, 0);
+    animates_Levels.push_back( tmpAnimator );
+
 
     //set Default Z Indexes
     tileZ=0; // tiles
@@ -159,6 +174,9 @@ WldScene::WldScene(GraphicsWorkspace * parentView, dataconfigs &configs, WorldDa
 
     WLD_ModeSetPoint * modeSetPoint = new WLD_ModeSetPoint(this);
     EditModes.push_back(modeSetPoint);
+
+    WLD_ModeFill * modeFill = new WLD_ModeFill(this);
+    EditModes.push_back(modeFill);
 
     CurrentMode = modeSelect;
     CurrentMode->set();

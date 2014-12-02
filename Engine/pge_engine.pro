@@ -4,14 +4,39 @@
 #
 #-------------------------------------------------
 
-QT += core gui opengl
+QT += core gui opengl network
 #QT += widgets
 
 DESTDIR = ../bin
 
+static: {
+release:OBJECTS_DIR = ../bin/_build/engine/_release/.obj
+release:MOC_DIR     = ../bin/_build/engine/_release/.moc
+release:RCC_DIR     = ../bin/_build/engine/_release/.rcc
+release:UI_DIR      = ../bin/_build/engine/_release/.ui
+
+debug:OBJECTS_DIR   = ../bin/_build/engine/_debug/.obj
+debug:MOC_DIR       = ../bin/_build/engine/_debug/.moc
+debug:RCC_DIR       = ../bin/_build/engine/_debug/.rcc
+debug:UI_DIR        = ../bin/_build/engine/_debug/.ui
+} else {
+release:OBJECTS_DIR = ../bin/_build/_dynamic/engine/_release/.obj
+release:MOC_DIR     = ../bin/_build/_dynamic/engine/_release/.moc
+release:RCC_DIR     = ../bin/_build/_dynamic/engine/_release/.rcc
+release:UI_DIR      = ../bin/_build/_dynamic/engine/_release/.ui
+
+debug:OBJECTS_DIR   = ../bin/_build/_dynamic/engine/_debug/.obj
+debug:MOC_DIR       = ../bin/_build/_dynamic/engine/_debug/.moc
+debug:RCC_DIR       = ../bin/_build/_dynamic/engine/_debug/.rcc
+debug:UI_DIR        = ../bin/_build/_dynamic/engine/_debug/.ui
+}
+
 TARGET = pge_engine
 TEMPLATE = app
 CONFIG += c++11
+
+CONFIG += static
+CONFIG += thread
 
 DEFINES += PGE_ENGINE
 
@@ -131,7 +156,12 @@ SOURCES += main.cpp \
     scenes/level/lvl_scene_init.cpp \
     physics/engine/pge_phys_world.cpp \
     physics/engine/Quadtree.cpp \
-    physics/engine/pge_phys_body.cpp
+    physics/engine/pge_phys_body.cpp \
+    gui/pge_msgbox.cpp \
+    gui/pge_boxbase.cpp \
+    fontman/font_manager.cpp \
+    networking/editor_pipe.cpp \
+    networking/intproc.cpp
 
 HEADERS  += \
     ../_Libs/Box2D/Box2D.h \
@@ -227,7 +257,12 @@ HEADERS  += \
     scenes/level/lvl_scene_ptr.h \
     physics/engine/pge_phys_world.h \
     physics/engine/Quadtree.h \
-    physics/engine/pge_phys_body.h
+    physics/engine/pge_phys_body.h \
+    gui/pge_msgbox.h \
+    gui/pge_boxbase.h \
+    fontman/font_manager.h \
+    networking/editor_pipe.h \
+    networking/intproc.h
 
 FORMS    += \
     data_configs/select_config.ui

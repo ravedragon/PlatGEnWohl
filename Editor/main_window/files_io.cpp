@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../ui_mainwindow.h"
+#include <ui_mainwindow.h>
 #include "../mainwindow.h"
 #include "../file_formats/file_formats.h"
 
@@ -35,18 +35,19 @@ void MainWindow::openFilesByArgs(QStringList args)
 void MainWindow::OpenFile(QString FilePath)
 {
 
+    qApp->setActiveWindow(this);
+
     QMdiSubWindow *existing = findOpenedFileWin(FilePath);
             if (existing) {
                 ui->centralWidget->setActiveSubWindow(existing);
                 return;
             }
 
-
     QFile file(FilePath);
 
     if (!file.open(QIODevice::ReadOnly)) {
-    QMessageBox::critical(this, tr("File open error"),
-    tr("Can't open the file."), QMessageBox::Ok);
+        QMessageBox::critical(this, tr("File open error"),
+        tr("Can't open the file."), QMessageBox::Ok);
         return;
     }
 
@@ -68,6 +69,25 @@ void MainWindow::OpenFile(QString FilePath)
         FileData.filename = in_1.baseName();
         FileData.path = in_1.absoluteDir().absolutePath();
         FileData.playmusic = GlobalSettings::autoPlayMusic;
+
+        file.close();
+        file.setFileName(FilePath+".meta");
+        if(QFileInfo(FilePath+".meta").exists())
+        {
+            if (file.open(QIODevice::ReadOnly))
+            {
+                QString metaRaw;
+                QTextStream meta(&file);
+                meta.setCodec("UTF-8");
+                metaRaw = meta.readAll();
+                FileData.metaData = FileFormats::ReadNonSMBX64MetaData(metaRaw, FilePath+".meta");
+            }
+            else
+            {
+                QMessageBox::critical(this, tr("File open error"),
+                tr("Can't open the file."), QMessageBox::Ok);
+            }
+        }
 
         leveledit *child = createLvlChild();
         if ( (bool)(child->loadFile(FilePath, FileData, configs, GlobalSettings::LvlOpts)) ) {
@@ -104,6 +124,25 @@ void MainWindow::OpenFile(QString FilePath)
             FileData= FileFormats::ReadExtendedWorldFile(file);
 
         if( !FileData.ReadFileValid ) return;
+
+        file.close();
+        file.setFileName(FilePath+".meta");
+        if(QFileInfo(FilePath+".meta").exists())
+        {
+            if (file.open(QIODevice::ReadOnly))
+            {
+                QString metaRaw;
+                QTextStream meta(&file);
+                meta.setCodec("UTF-8");
+                metaRaw = meta.readAll();
+                FileData.metaData = FileFormats::ReadNonSMBX64MetaData(metaRaw, FilePath+".meta");
+            }
+            else
+            {
+                QMessageBox::critical(this, tr("File open error"),
+                tr("Can't open the file."), QMessageBox::Ok);
+            }
+        }
 
         WorldEdit *child = createWldChild();
         if ( (bool)(child->loadFile(FilePath, FileData, configs, GlobalSettings::LvlOpts)) ) {

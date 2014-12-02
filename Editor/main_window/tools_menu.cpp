@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui_mainwindow.h"
+#include <ui_mainwindow.h>
 #include "../mainwindow.h"
 
 #include "../tilesets/tilesetconfiguredialog.h"
@@ -28,6 +28,7 @@
 #include "../external_tools/lazyfixtool_gui.h"
 #include "../external_tools/gifs2png_gui.h"
 #include "../external_tools/png2gifs_gui.h"
+
 
 void MainWindow::on_actionConfigure_Tilesets_triggered()
 {
@@ -110,4 +111,23 @@ void MainWindow::on_actionPNG2GIFs_triggered()
     pngToGifGUI->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, pngToGifGUI->size(), qApp->desktop()->availableGeometry()));
     pngToGifGUI->show();
 }
+
+
+
+void MainWindow::on_actionSprite_editor_triggered()
+{
+    QMessageBox::information(this, "Dummy", "This feature comming soon!", QMessageBox::Ok);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -27,11 +27,16 @@ class GraphicsHelps
 {
 public:
     static QPixmap setAlphaMask(QPixmap image, QPixmap mask);
+    static QImage setAlphaMask_VB(QImage image, QImage mask);
+    static bool EnableVBEmulate;
+
     static QImage fromBMP(QString& file);
     static QPixmap loadPixmap(QString file);
     static QImage loadQImage(QString file);
     static QPixmap squareImage(QPixmap image, QSize targetSize);
     static QPixmap drawDegitFont(int number);
+
+    static bool toGif(QImage& img, QString& path);
 };
 
 #endif // GRAPHICS_FUNCS_H

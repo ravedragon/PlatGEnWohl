@@ -18,10 +18,18 @@
 
 #include <QPixmap>
 #include <QImage>
+#include <QFile>
+#include <QTextStream>
 #include "graphics_funcs.h"
 #include "../../_Libs/EasyBMP/EasyBMP.h"
+extern "C"{
+#include "../../_Libs/giflib/gif_lib.h"
+}
 #include "logger.h"
 
+#include <QtDebug>
+
+bool GraphicsHelps::EnableVBEmulate=true;
 
 QPixmap GraphicsHelps::setAlphaMask(QPixmap image, QPixmap mask)
 {
@@ -39,11 +47,97 @@ QPixmap GraphicsHelps::setAlphaMask(QPixmap image, QPixmap mask)
         newmask = newmask.copy(0,0, target.width(), target.height());
     }
 
-    newmask.invertPixels();
-
-    target.setAlphaChannel(newmask);
-
+    if(EnableVBEmulate)
+        target = setAlphaMask_VB(target, newmask);
+    else
+        {
+                newmask.invertPixels();
+                target.setAlphaChannel(newmask);
+        }
     return QPixmap::fromImage(target);
+}
+
+//Implementation of VB similar transparency function
+QImage GraphicsHelps::setAlphaMask_VB(QImage image, QImage mask)
+{
+    if(mask.isNull())
+        return image;
+
+    if(image.isNull())
+        return image;
+
+    bool isWhiteMask = true;
+
+    QImage target;
+
+    target = QImage(image.width(), image.height(), QImage::Format_ARGB32);
+    target.fill(qRgb(128,128,128));
+
+    QImage newmask = mask;
+    target.convertToFormat(QImage::Format_ARGB32);
+
+    if(target.size()!= newmask.size())
+    {
+        newmask = newmask.copy(0, 0, target.width(), target.height());
+    }
+
+    QImage alphaChannel = image.alphaChannel();
+
+    //vbSrcAnd
+    for(int y=0; y< image.height(); y++ )
+        for(int x=0; x < image.width(); x++ )
+        {
+            QColor Dpix = QColor(target.pixel(x,y));
+            QColor Spix = QColor(newmask.pixel(x,y));
+            QColor Npix;
+
+            Npix.setAlpha(255);
+            Npix.setRed( Dpix.red() & Spix.red());
+            Npix.setGreen( Dpix.green() & Spix.green());
+            Npix.setBlue( Dpix.blue() & Spix.blue());
+            target.setPixel(x, y, Npix.rgba());
+
+            isWhiteMask &= ( (Spix.red()>240) //is almost White
+                             &&(Spix.green()>240)
+                             &&(Spix.blue()>240));
+
+            int newAlpha = 255-((Spix.red() + Spix.green() + Spix.blue())/3);
+
+            if( (Spix.red()>240) //is almost White
+                            &&(Spix.green()>240)
+                            &&(Spix.blue()>240))
+            {
+                newAlpha = 0;
+            }
+
+            alphaChannel.setPixel(x,y, newAlpha);
+        }
+
+    //vbSrcPaint
+    for(int y=0; y< image.height(); y++ )
+        for(int x=0; x < image.width(); x++ )
+        {
+            QColor Dpix = QColor(image.pixel(x,y));
+            QColor Spix = QColor(target.pixel(x,y));
+            QColor Npix;
+
+            Npix.setAlpha(255);
+            Npix.setRed( Dpix.red() | Spix.red());
+            Npix.setGreen( Dpix.green() | Spix.green());
+            Npix.setBlue( Dpix.blue() | Spix.blue());
+            target.setPixel(x, y, Npix.rgba());
+
+            //QColor curAlpha;
+            int curAlpha = QColor(alphaChannel.pixel(x,y)).red();
+            int newAlpha = curAlpha+((Dpix.red() + Dpix.green() + Dpix.blue())/3);
+
+            if(newAlpha>255) newAlpha=255;
+            alphaChannel.setPixel(x,y, newAlpha);
+        }
+
+    target.setAlphaChannel(alphaChannel);
+
+    return target;
 }
 
 QImage GraphicsHelps::fromBMP(QString &file)
@@ -118,4 +212,111 @@ QPixmap GraphicsHelps::drawDegitFont(int number)
     }
     p.end();
     return img;
+}
+
+bool GraphicsHelps::toGif(QImage& img, QString& path)
+{
+    int errcode;
+
+    if(QFile(path).exists()) // Remove old file
+        QFile::remove(path);
+
+    GifFileType* t = EGifOpenFileName(path.toLocal8Bit().data(),true, &errcode);
+    if(!t)
+    {
+        EGifCloseFile(t, &errcode);
+        qWarning()  << "Can't open\n";
+        return false;
+    }
+
+    EGifSetGifVersion(t, true);
+
+    GifColorType* colorArr = new GifColorType[256];
+    ColorMapObject* cmo = GifMakeMapObject(256, colorArr);
+
+    bool unfinished = false;
+    QImage tarQImg(img.width(), img.height(), QImage::Format_Indexed8);
+    QVector<QRgb> table;
+    for(int y = 0; y < img.height(); y++){
+        for(int x = 0; x < img.width(); x++){
+            if(table.size() >= 256){
+                unfinished = true;
+                break;
+            }
+            QRgb pix;
+            if(!table.contains(pix = img.pixel(x,y))){
+                table.push_back(pix);
+                tarQImg.setColor(tarQImg.colorCount(), pix);
+            }
+            tarQImg.setPixel(x,y,table.indexOf(pix));
+        }
+        if(table.size() >= 256){
+            unfinished = true;
+            break;
+        }
+    }
+
+    if(unfinished){
+        EGifCloseFile(t, &errcode);
+        qWarning() << "Unfinished\n";
+        return false;
+    }
+
+
+    for(int l = tarQImg.colorCount(); l < 256; l++){
+        tarQImg.setColor(l,0);
+    }
+
+    if(tarQImg.colorTable().size() != 256){
+        EGifCloseFile(t, &errcode);
+        qWarning()  << "A lot of colors\n";
+        return false;
+    }
+
+    QVector<QRgb> clTab = tarQImg.colorTable();
+
+    for(int i = 0; i < 255; i++){
+        QRgb rgb = clTab[i];
+        colorArr[i].Red = qRed(rgb);
+        colorArr[i].Green = qGreen(rgb);
+        colorArr[i].Blue = qBlue(rgb);
+    }
+    cmo->Colors = colorArr;
+
+    errcode = EGifPutScreenDesc(t, img.width(), img.height(), 256, 0, cmo);
+    if(errcode != GIF_OK){
+        EGifCloseFile(t, &errcode);
+        qWarning()  << "EGifPutScreenDesc error 1\n";
+        return false;
+    }
+
+    errcode = EGifPutImageDesc(t, 0, 0, img.width(), img.height(), false, 0);
+    if(errcode != GIF_OK){
+        EGifCloseFile(t, &errcode);
+        qWarning()  << "EGifPutImageDesc error 2\n";
+        return false;
+    }
+
+    //gen byte array
+    GifByteType* byteArr = tarQImg.bits();
+
+    for(int h = 0; h < tarQImg.height(); h++){
+        errcode = EGifPutLine(t, byteArr, tarQImg.width());
+        if(errcode != GIF_OK){
+            EGifCloseFile(t, &errcode);
+            qWarning()  << "EGifPutLine error 3\n";
+            return false;
+        }
+
+        byteArr += tarQImg.width();
+        byteArr += ((tarQImg.width() % 4)!=0 ? 4 - (tarQImg.width() % 4) : 0);
+    }
+
+    if(errcode != GIF_OK){
+        qWarning()  << "GIF error 4\n";
+        return false;
+    }
+    EGifCloseFile(t, &errcode);
+
+    return true;
 }

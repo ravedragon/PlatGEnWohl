@@ -18,7 +18,7 @@
 
 
 #include "../mainwindow.h"
-#include "../ui_mainwindow.h"
+#include <ui_mainwindow.h>
 #include "../common_features/themes.h"
 #include "global_settings.h"
 
@@ -48,6 +48,12 @@ void MainWindow::applyTheme(QString themeDir)
     ui->actionDebugger->setIcon(Themes::icon(Themes::debugger));
     ui->debuggerBox->setWindowIcon(Themes::icon(Themes::debugger));
 
+    ui->actionTilesetBox->setIcon(Themes::icon(Themes::tileset_box));
+    ui->Tileset_Item_Box->setWindowIcon(Themes::icon(Themes::tileset_box));
+
+    ui->actionBookmarkBox->setIcon(Themes::icon(Themes::bookmarks));
+    ui->bookmarkBox->setWindowIcon(Themes::icon(Themes::bookmarks));
+
     ui->actionPlayMusic->setIcon(Themes::icon(Themes::playmusic));
     ui->actionGridEn->setIcon(Themes::icon(Themes::grid_snap));
     ui->actionAnimation->setIcon(Themes::icon(Themes::animation));
@@ -75,7 +81,10 @@ void MainWindow::applyTheme(QString themeDir)
 
     ui->actionSquareFill->setIcon(Themes::icon(Themes::square_fill));
     ui->actionLine->setIcon(Themes::icon(Themes::line_tool));
+    ui->actionFill->setIcon(Themes::icon(Themes::flood_fill));
     ui->actionOverwriteMode->setIcon(Themes::icon(Themes::overwrite_mode));
+
+    ui->action_Placing_ShowProperties->setIcon(Themes::icon(Themes::properties));
 
     ui->actionZoomReset->setIcon(Themes::icon(Themes::zoom_reset));
     ui->actionZoomIn->setIcon(Themes::icon(Themes::zoom_in));

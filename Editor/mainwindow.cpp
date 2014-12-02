@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ui_mainwindow.h"
+#include <ui_mainwindow.h>
 #include "mainwindow.h"
 
 #include "npc_dialog/npcdialog.h"
@@ -217,3 +217,4 @@ void MainWindow::on_actionSwitch_to_Fullscreen_triggered(bool checked)
         this->showNormal();
     }
 }
+

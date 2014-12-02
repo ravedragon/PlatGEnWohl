@@ -26,6 +26,29 @@ QT       -= opengl
 
 DESTDIR = ../bin
 
+static: {
+release:OBJECTS_DIR = ../bin/_build/gif2png/_release/.obj
+release:MOC_DIR     = ../bin/_build/gif2png/_release/.moc
+release:RCC_DIR     = ../bin/_build/gif2png/_release/.rcc
+release:UI_DIR      = ../bin/_build/gif2png/_release/.ui
+
+debug:OBJECTS_DIR   = ../bin/_build/gif2png/_debug/.obj
+debug:MOC_DIR       = ../bin/_build/gif2png/_debug/.moc
+debug:RCC_DIR       = ../bin/_build/gif2png/_debug/.rcc
+debug:UI_DIR        = ../bin/_build/gif2png/_debug/.ui
+} else {
+release:OBJECTS_DIR = ../bin/_build/_dynamic/gif2png/_release/.obj
+release:MOC_DIR     = ../bin/_build/_dynamic/gif2png/_release/.moc
+release:RCC_DIR     = ../bin/_build/_dynamic/gif2png/_release/.rcc
+release:UI_DIR      = ../bin/_build/_dynamic/gif2png/_release/.ui
+
+debug:OBJECTS_DIR   = ../bin/_build/_dynamic/gif2png/_debug/.obj
+debug:MOC_DIR       = ../bin/_build/_dynamic/gif2png/_debug/.moc
+debug:RCC_DIR       = ../bin/_build/_dynamic/gif2png/_debug/.rcc
+debug:UI_DIR        = ../bin/_build/_dynamic/gif2png/_debug/.ui
+}
+
+
 DEFINES += QT_NO_TRANSLATION
 
 TARGET = GIFs2PNG
